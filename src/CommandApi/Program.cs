@@ -1,4 +1,3 @@
-
 namespace CommandApi;
 
 public class Program
@@ -8,6 +7,17 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
+
+        var connectionString = new NpgsqlConnectionStringBuilder
+        {
+            ConnectionString = builder.Configuration.GetConnectionString("PostgreSqlConnection"),
+            Username = builder.Configuration["DbUserId"],
+            Password = builder.Configuration["DbPassword"]
+        };
+
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseNpgsql(connectionString.ConnectionString));
+        builder.Services.AddInfrastructure(builder.Configuration);
 
         builder.Services.AddControllers();
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
