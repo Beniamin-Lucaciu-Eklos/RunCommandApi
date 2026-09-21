@@ -1,5 +1,8 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/CommandApi.Application/CommandApi.Application.csproj" />
+    <Project Path="src/CommandApi.Domain/CommandApi.Domain.csproj" />
+    <Project Path="src/CommandApi.Infrastructure/CommandApi.Infrastructure.csproj" />
     <Project Path="src/CommandApi/CommandApi.csproj" />
   </Folder>
 </Solution>
