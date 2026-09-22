@@ -4,7 +4,7 @@ GET {{host}}/api/platforms
 Accept: application/json
 ### Get all platforms
 
-GET {{host}}/api/platforms/2
+GET {{host}}/api/platforms/3
 Accept: application/json
 ### Get platform by Id
 
@@ -16,7 +16,7 @@ Content-Type: application/json
 }
 ### create platform
 
-PUT {{host}}/api/platforms/2
+PUT {{host}}/api/platforms/3
 Content-Type: application/json
 
 {
@@ -24,6 +24,6 @@ Content-Type: application/json
 }
 ### update platform
 
-DELETE {{host}}/api/platforms/1
+DELETE {{host}}/api/platforms/2
 Accept: application/json
-### delete
+### delete platform with id
