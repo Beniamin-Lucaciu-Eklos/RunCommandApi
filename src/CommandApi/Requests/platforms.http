@@ -1,0 +1,29 @@
+@host =http://localhost:5029
+
+GET {{host}}/api/platforms
+Accept: application/json
+### Get all platforms
+
+GET {{host}}/api/platforms/2
+Accept: application/json
+### Get platform by Id
+
+POST {{host}}/api/platforms
+Content-Type: application/json
+
+{
+   "platformName": "Kubernetes"
+}
+### create platform
+
+PUT {{host}}/api/platforms/2
+Content-Type: application/json
+
+{
+   "platformName": "Kubernetes update"
+}
+### update platform
+
+DELETE {{host}}/api/platforms/1
+Accept: application/json
+### delete
