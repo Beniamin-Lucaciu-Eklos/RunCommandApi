@@ -11,5 +11,8 @@ public sealed class PlatformEntityConfiguration : IEntityTypeConfiguration<Platf
         builder.Property(p => p.PlatformName)
               .HasMaxLength(256)
               .IsRequired();
+
+        builder.Property(p => p.CreatedAt)
+               .IsRequired();               
     }
 }
