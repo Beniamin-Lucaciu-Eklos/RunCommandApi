@@ -1,17 +1,13 @@
-using CommandApi.Application.Dtos;
-using CommandApi.Domain.Models;
-using Microsoft.AspNetCore.Mvc;
-
 namespace CommandApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class PlatformsController(ApplicationDbContext dbContext) : ControllerBase
+public class PlatformsController(IPlatformRepository platformRepository) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PlatformReadDto>>> GetAllAsync()
     {
-        var platforms = await dbContext.Platforms.ToListAsync();
+        var platforms = await platformRepository.GetAllAsync();
         var platformDtos = platforms.Select(p => new PlatformReadDto(p.Id, p.PlatformName, p.CreatedAt));
 
         return Ok(platformDtos);
@@ -20,7 +16,7 @@ public class PlatformsController(ApplicationDbContext dbContext) : ControllerBas
     [HttpGet("{id}", Name = "GetById")]
     public async Task<ActionResult<PlatformReadDto>> GetById(int id)
     {
-        var platform = await dbContext.Platforms.FirstOrDefaultAsync(p => p.Id == id);
+        var platform = await platformRepository.GetByIdAsync(id);
         if (platform is null)
             return NotFound();
 
@@ -39,8 +35,8 @@ public class PlatformsController(ApplicationDbContext dbContext) : ControllerBas
             PlatformName = platformCreateDto.PlatformName
         };
 
-        await dbContext.Platforms.AddAsync(platform);
-        await dbContext.SaveChangesAsync();
+        await platformRepository.CreateAsync(platform);
+        await platformRepository.SaveChangesAsync();
 
         var platformReadDto = new PlatformReadDto(platform.Id, platform.PlatformName, platform.CreatedAt);
 
@@ -50,12 +46,12 @@ public class PlatformsController(ApplicationDbContext dbContext) : ControllerBas
     [HttpPut("{id:int}")]
     public async Task<ActionResult> Update(int id, PlatformUpdateDto platformUpdateDto)
     {
-        var platformFromContext = await dbContext.Platforms.FirstOrDefaultAsync(p => p.Id == id);
+        var platformFromContext = await platformRepository.GetByIdAsync(id);
         if (platformFromContext is null)
             return NotFound();
 
         platformFromContext!.PlatformName = platformUpdateDto.PlatformName;
-        await dbContext.SaveChangesAsync();
+        await platformRepository.SaveChangesAsync();
 
         return NoContent();
     }
@@ -63,9 +59,7 @@ public class PlatformsController(ApplicationDbContext dbContext) : ControllerBas
     [HttpDelete("{id:int}")]
     public async Task<ActionResult> Delete(int id)
     {
-        await dbContext.Platforms
-          .Where(p => p.Id == id)
-          .ExecuteDeleteAsync();
+        await platformRepository.DeleteAsync(id);
 
         return NoContent();
     }
