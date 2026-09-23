@@ -13,6 +13,12 @@ public sealed class PlatformEntityConfiguration : IEntityTypeConfiguration<Platf
               .IsRequired();
 
         builder.Property(p => p.CreatedAt)
-               .IsRequired();               
+               .IsRequired();
+
+        builder.HasMany(p => p.Commands)
+               .WithOne()
+               .HasForeignKey(c=>c.PlatformId)
+               .OnDelete(DeleteBehavior.Cascade);
+                 
     }
 }

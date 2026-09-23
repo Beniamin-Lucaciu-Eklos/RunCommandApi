@@ -8,6 +8,7 @@ public static class DependencyInjection
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
         services.AddScoped<IPlatformRepository, PlatformRepository>();
+        services.AddScoped<ICommandRepository, CommandRepository>();
 
         return services;
     }
