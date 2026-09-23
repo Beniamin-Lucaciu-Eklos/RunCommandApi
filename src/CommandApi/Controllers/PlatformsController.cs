@@ -2,7 +2,9 @@ namespace CommandApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class PlatformsController(IPlatformRepository platformRepository) : ControllerBase
+public class PlatformsController(
+    IPlatformRepository platformRepository,
+    ICommandRepository commandRepository) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PlatformReadDto>>> GetAllAsync()
@@ -22,6 +24,18 @@ public class PlatformsController(IPlatformRepository platformRepository) : Contr
 
         var platformDto = new PlatformReadDto(platform.Id, platform.PlatformName, platform.CreatedAt);
         return Ok(platformDto);
+    }
+
+    [HttpGet("{platformId:int}/commands")]
+    public async Task<ActionResult<CommandReadDto>> GetCommandsByPlatformId(int platformId)
+    {
+        var platform = await platformRepository.GetByIdAsync(platformId);
+        if (platform is null)
+            return NotFound();
+
+        var commands = await commandRepository.GetAllByPlatformIdAsync(platformId);
+        var commandsDto = commands.Select(x => new CommandReadDto(x.Id, x.HowTo, x.CommandLine, x.PlatformId, x.CreatedAt));
+        return Ok(commandsDto);
     }
 
     [HttpPost]

@@ -1,0 +1,34 @@
+@host =http://localhost:5029
+@platformId = 4
+@commandId = 1
+
+### Get all commands
+GET {{host}}/api/commands
+
+### Get command by ID
+GET {{host}}/api/commands/{{commandId}}
+
+### Get commands for a platform
+GET {{host}}/api/platforms/{{platformId}}/commands
+
+### Create a new command
+POST {{host}}/api/commands
+Content-Type: application/json
+
+{
+  "howTo": "List all running containers",
+  "commandLine": "docker ps",
+  "platformId": {{platformId}}
+}
+
+### Update a command
+PUT {{host}}/api/commands/{{commandId}}
+Content-Type: application/json
+
+{
+  "howTo": "List all containers (including stopped)",
+  "commandLine": "docker ps -a"
+}
+
+### Delete a command
+DELETE {{host}}/api/commands/{{commandId}}

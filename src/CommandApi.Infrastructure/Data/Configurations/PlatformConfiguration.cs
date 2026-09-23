@@ -17,8 +17,8 @@ public sealed class PlatformEntityConfiguration : IEntityTypeConfiguration<Platf
 
         builder.HasMany(p => p.Commands)
                .WithOne()
-               .HasForeignKey(c=>c.PlatformId)
+               .HasForeignKey(c => c.PlatformId)
                .OnDelete(DeleteBehavior.Cascade);
-                 
+
     }
 }
