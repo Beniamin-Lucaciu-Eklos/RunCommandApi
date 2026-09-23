@@ -1,8 +1,14 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web"><PropertyGroup>  <UserSecretsId>690a3ae3-c064-473c-ae29-f949fd96b66f</UserSecretsId>
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <UserSecretsId>690a3ae3-c064-473c-ae29-f949fd96b66f</UserSecretsId>
   </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Mapster" />
+    <PackageReference Include="Mapster.DependencyInjection" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\CommandApi.Infrastructure\CommandApi.Infrastructure.csproj" />
   </ItemGroup>
