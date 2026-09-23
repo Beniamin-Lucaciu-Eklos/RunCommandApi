@@ -16,10 +16,7 @@ public class PlatformRepository(IApplicationDbContext dbContext) : IPlatformRepo
 
     public async Task CreateAsync(Platform platform)
     {
-        if (platform == null)
-        {
-            throw new ArgumentNullException(nameof(platform));
-        }
+        ArgumentNullException.ThrowIfNull(platform);
 
         await dbContext.Platforms.AddAsync(platform);
     }
