@@ -1,3 +1,5 @@
+using Mapster;
+
 namespace CommandApi.Controllers;
 
 [ApiController]
@@ -10,7 +12,7 @@ public class PlatformsController(
     public async Task<ActionResult<IEnumerable<PlatformReadDto>>> GetAllAsync()
     {
         var platforms = await platformRepository.GetAllAsync();
-        var platformDtos = platforms.Select(p => new PlatformReadDto(p.Id, p.PlatformName, p.CreatedAt));
+        var platformDtos = platforms.Select(p => p.Adapt<PlatformReadDto>());
 
         return Ok(platformDtos);
     }
@@ -22,7 +24,7 @@ public class PlatformsController(
         if (platform is null)
             return NotFound();
 
-        var platformDto = new PlatformReadDto(platform.Id, platform.PlatformName, platform.CreatedAt);
+        var platformDto = platform.Adapt<PlatformReadDto>();
         return Ok(platformDto);
     }
 
@@ -34,7 +36,7 @@ public class PlatformsController(
             return NotFound();
 
         var commands = await commandRepository.GetAllByPlatformIdAsync(platformId);
-        var commandsDto = commands.Select(x => new CommandReadDto(x.Id, x.HowTo, x.CommandLine, x.PlatformId, x.CreatedAt));
+        var commandsDto = commands.Select(c=> c.Adapt<CommandReadDto>());
         return Ok(commandsDto);
     }
 
@@ -44,16 +46,12 @@ public class PlatformsController(
         if (platformCreateDto is null)
             return BadRequest();
 
-        var platform = new Platform
-        {
-            PlatformName = platformCreateDto.PlatformName
-        };
+        var platform = platformCreateDto.Adapt<Platform>();
 
         await platformRepository.CreateAsync(platform);
         await platformRepository.SaveChangesAsync();
 
-        var platformReadDto = new PlatformReadDto(platform.Id, platform.PlatformName, platform.CreatedAt);
-
+        var platformReadDto = platform.Adapt<PlatformReadDto>();
         return CreatedAtRoute(nameof(GetById), new { Id = platform.Id }, platformReadDto);
     }
 

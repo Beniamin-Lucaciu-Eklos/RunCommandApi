@@ -1,4 +1,4 @@
-using System.Runtime.CompilerServices;
+using Mapster;
 
 namespace CommandApi.Controllers;
 
@@ -12,7 +12,7 @@ public class CommandsController(ICommandRepository commandRepository) : Controll
     {
         var commands = await commandRepository.GetAllAsync();
 
-        var commandsDto = commands.Select(x => new CommandReadDto(x.Id, x.HowTo, x.CommandLine, x.PlatformId, x.CreatedAt));
+        var commandsDto = commands.Select(c => c.Adapt<CommandReadDto>());
 
         return Ok(commandsDto);
     }
@@ -24,24 +24,19 @@ public class CommandsController(ICommandRepository commandRepository) : Controll
         if (command is null)
             return NotFound();
 
-        var commandDto = new CommandReadDto(command.Id, command.HowTo, command.CommandLine, command.PlatformId, command.CreatedAt);
+        var commandDto = command.Adapt<CommandReadDto>();
         return Ok(commandDto);
     }
 
     [HttpPost]
     public async Task<ActionResult> Create(CommandCreateDto dto)
     {
-        var command = new Command
-        {
-            HowTo = dto.HowTo,
-            CommandLine = dto.CommandLine,
-            PlatformId = dto.PlatformId
-        };
+        var command = dto.Adapt<Command>();
 
         await commandRepository.CreateAsync(command);
         await commandRepository.SaveChangesAsync();
 
-        var commandReadDto = new CommandReadDto(command.Id, command.HowTo, command.CommandLine, command.PlatformId, command.CreatedAt);
+        var commandReadDto = command.Adapt<CommandReadDto>();
 
         return CreatedAtAction(nameof(GetCommandById), new { Id = commandReadDto.Id }, commandReadDto);
     }

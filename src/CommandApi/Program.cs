@@ -1,3 +1,6 @@
+using CommandApi.Application;
+using Mapster;
+
 namespace CommandApi;
 
 public class Program
@@ -14,10 +17,14 @@ public class Program
             Username = builder.Configuration["DbUserId"],
             Password = builder.Configuration["DbPassword"]
         };
-
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(connectionString.ConnectionString));
-        builder.Services.AddInfrastructure(builder.Configuration);
+
+        builder.Services.AddMapster();
+
+        builder.Services
+                    .AddApplication()
+                    .AddInfrastructure(builder.Configuration);
 
         builder.Services.AddControllers();
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
