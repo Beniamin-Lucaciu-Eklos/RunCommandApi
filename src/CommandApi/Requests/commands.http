@@ -30,5 +30,17 @@ Content-Type: application/json
   "commandLine": "docker ps -a"
 }
 
+### Patch a command (update howTo only)
+PATCH {{host}}/api/commands/{{commandId}}
+Content-Type: application/json-patch+json
+
+[
+  {
+    "op": "replace",
+    "path": "/howTo",
+    "value": "List all containers including stopped ones"
+  }
+]
+
 ### Delete a command
 DELETE {{host}}/api/commands/{{commandId}}

@@ -1,4 +1,5 @@
 using Mapster;
+using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
 
 namespace CommandApi.Controllers;
 
@@ -50,6 +51,33 @@ public class CommandsController(ICommandRepository commandRepository) : Controll
 
         command.HowTo = dto.HowTo;
         command.CommandLine = dto.CommandLine;
+
+        await commandRepository.UpdateAsync(command);
+        await commandRepository.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    [HttpPatch("{id:int}")]
+    public async Task<ActionResult> PartialUpdate(int id, JsonPatchDocument<CommandUpdateDto> patchDocument)
+    {
+        var command = await commandRepository.GetByIdAsync(id);
+        if (command is null)
+            return NotFound("you must supply a valid command id in the route");
+
+        var commandPatch = command.Adapt<CommandUpdateDto>();
+        patchDocument.ApplyTo(commandPatch, JsonPatchError =>
+        {
+            var key = JsonPatchError.AffectedObject.GetType().Name;
+            ModelState.AddModelError(key, JsonPatchError.ErrorMessage);
+        });
+
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        commandPatch.Adapt(command);
 
         await commandRepository.UpdateAsync(command);
         await commandRepository.SaveChangesAsync();
