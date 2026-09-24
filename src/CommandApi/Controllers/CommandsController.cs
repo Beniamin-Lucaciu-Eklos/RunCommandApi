@@ -8,12 +8,15 @@ namespace CommandApi.Controllers;
 public class CommandsController(ICommandRepository commandRepository) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<PaginatedList<CommandReadDto>>> GetAllAsync([FromQuery] PaginationParams paginationParams)
+    public async Task<ActionResult<PaginatedList<CommandReadDto>>> GetAllAsync(
+        [FromQuery] PaginationParams paginationParams,
+        [FromQuery] FilteringParams filteringParams,
+        [FromQuery] SortingParams sortingParams)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var commands = await commandRepository.GetAllAsync(paginationParams);
+        var commands = await commandRepository.GetAllAsync(paginationParams, filteringParams, sortingParams);
 
         var commandsDto = commands.Items.Select(c => c.Adapt<CommandReadDto>()).ToList();
 

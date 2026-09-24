@@ -3,7 +3,7 @@
 @commandId = 1
 @paginationParams =pageIndex=1&pageSize=3
 ### Get all commands
-GET {{host}}/api/commands?{{paginationParams}}
+GET {{host}}/api/commands?{{paginationParams}}&searchBy=docker
 
 ### Get command by ID
 GET {{host}}/api/commands/{{commandId}}
@@ -19,6 +19,15 @@ Content-Type: application/json
   "howTo": "List all running containers",
   "commandLine": "docker ps",
   "platformId": {{platformId}}
+}
+###
+POST {{host}}/api/commands
+Content-Type: application/json
+
+{
+  "howTo": "List all Huginn",
+  "commandLine": "docker Huginn",
+  "platformId": 7
 }
 
 ### Update a command
