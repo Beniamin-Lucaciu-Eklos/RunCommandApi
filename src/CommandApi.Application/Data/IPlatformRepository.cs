@@ -4,7 +4,7 @@ public interface IPlatformRepository
 {
     Task<bool> SaveChangesAsync();
 
-    Task<IEnumerable<Platform>> GetAllAsync();
+    Task<PaginatedList<Platform>> GetAllAsync(PaginationParams paginationParams);
 
     Task<Platform?> GetByIdAsync(int id);
 

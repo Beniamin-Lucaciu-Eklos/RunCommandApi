@@ -7,15 +7,23 @@ namespace CommandApi.Controllers;
 [Route("api/[controller]")]
 public class CommandsController(ICommandRepository commandRepository) : ControllerBase
 {
-
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<CommandReadDto>>> GetAllAsync()
+    public async Task<ActionResult<PaginatedList<CommandReadDto>>> GetAllAsync([FromQuery] PaginationParams paginationParams)
     {
-        var commands = await commandRepository.GetAllAsync();
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-        var commandsDto = commands.Select(c => c.Adapt<CommandReadDto>());
+        var commands = await commandRepository.GetAllAsync(paginationParams);
 
-        return Ok(commandsDto);
+        var commandsDto = commands.Items.Select(c => c.Adapt<CommandReadDto>()).ToList();
+
+        var result = new PaginatedList<CommandReadDto>(
+            commandsDto,
+            commands.Count,
+            commands.Index,
+            commands.PageSize);
+
+        return Ok(result);
     }
 
     [HttpGet("{id}", Name = "GetCommandById")]

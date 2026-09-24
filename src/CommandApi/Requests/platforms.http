@@ -1,6 +1,7 @@
 @host =http://localhost:5029
+@paginationParams =pageIndex=1&pageSize=3
 
-GET {{host}}/api/platforms
+GET {{host}}/api/platforms?{{paginationParams}}
 Accept: application/json
 ### Get all platforms
 

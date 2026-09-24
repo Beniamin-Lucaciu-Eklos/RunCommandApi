@@ -1,12 +1,19 @@
+using CommandApi.Application.Dtos;
+
 namespace CommandApi.Infrastructure.Data.Repositories;
 
 public class PlatformRepository(IApplicationDbContext dbContext) : IPlatformRepository
 {
-    public async Task<IEnumerable<Platform>> GetAllAsync()
+    public async Task<PaginatedList<Platform>> GetAllAsync(PaginationParams paginationParams)
     {
         var platforms = await dbContext.Platforms.AsNoTracking()
+            .OrderBy(p => p.Id)
+            .Skip((paginationParams.PageIndex - 1) * paginationParams.PageSize)
+            .Take(paginationParams.PageSize)
             .ToListAsync();
-        return platforms;
+
+        var count = await dbContext.Platforms.CountAsync();
+        return new PaginatedList<Platform>(platforms, count, paginationParams.PageIndex, paginationParams.PageSize);
     }
 
     public async Task<Platform?> GetByIdAsync(int id)

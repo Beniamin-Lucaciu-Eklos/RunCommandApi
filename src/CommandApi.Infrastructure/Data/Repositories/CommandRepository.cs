@@ -1,20 +1,34 @@
+using CommandApi.Application.Dtos;
+
 namespace CommandApi.Infrastructure.Data.Repositories;
 
 public class CommandRepository(IApplicationDbContext dbContext) : ICommandRepository
 {
-    public async Task<IEnumerable<Command>> GetAllAsync()
+    public async Task<PaginatedList<Command>> GetAllAsync(PaginationParams paginationParams)
     {
         var commands = await dbContext.Commands.AsNoTracking()
-            .ToListAsync();
-        return commands;
+           .OrderBy(c => c.Id)
+           .Skip((paginationParams.PageIndex - 1) * paginationParams.PageSize)
+           .Take(paginationParams.PageSize)
+           .ToListAsync();
+
+        var count = await dbContext.Commands.CountAsync();
+        return new PaginatedList<Command>(commands, count, paginationParams.PageIndex, paginationParams.PageSize);
     }
 
-    public async Task<IEnumerable<Command>> GetAllByPlatformIdAsync(int platformId)
+    public async Task<PaginatedList<Command>> GetAllByPlatformIdAsync(int platformId, PaginationParams paginationParams)
     {
         var commands = await dbContext.Commands.AsNoTracking()
              .Where(x => x.PlatformId == platformId)
+             .OrderBy(c => c.Id)
+             .Skip((paginationParams.PageIndex - 1) * paginationParams.PageSize)
+             .Take(paginationParams.PageSize)
              .ToListAsync();
-        return commands;
+
+        var count = await dbContext.Commands.AsNoTracking()
+            .CountAsync(x => x.PlatformId == platformId);
+
+        return new PaginatedList<Command>(commands, count, paginationParams.PageIndex, paginationParams.PageSize);
     }
 
 

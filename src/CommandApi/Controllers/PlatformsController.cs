@@ -9,12 +9,20 @@ public class PlatformsController(
     ICommandRepository commandRepository) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<PlatformReadDto>>> GetAllAsync()
+    public async Task<ActionResult<PaginatedList<PlatformReadDto>>> GetAllAsync([FromQuery] PaginationParams paginationParams)
     {
-        var platforms = await platformRepository.GetAllAsync();
-        var platformDtos = platforms.Select(p => p.Adapt<PlatformReadDto>());
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-        return Ok(platformDtos);
+        var platforms = await platformRepository.GetAllAsync(paginationParams);
+        var platformDtos = platforms.Items.Select(p => p.Adapt<PlatformReadDto>()).ToList();
+
+        var result = new PaginatedList<PlatformReadDto>(platformDtos,
+        platforms.Count,
+        platforms.Index,
+        platforms.PageSize);
+
+        return Ok(result);
     }
 
     [HttpGet("{id}", Name = "GetById")]
@@ -29,15 +37,25 @@ public class PlatformsController(
     }
 
     [HttpGet("{platformId:int}/commands")]
-    public async Task<ActionResult<CommandReadDto>> GetCommandsByPlatformId(int platformId)
+    public async Task<ActionResult<CommandReadDto>> GetCommandsByPlatformId(int platformId, [FromQuery] PaginationParams paginationParams)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
         var platform = await platformRepository.GetByIdAsync(platformId);
         if (platform is null)
             return NotFound();
 
-        var commands = await commandRepository.GetAllByPlatformIdAsync(platformId);
-        var commandsDto = commands.Select(c=> c.Adapt<CommandReadDto>());
-        return Ok(commandsDto);
+        var commands = await commandRepository.GetAllByPlatformIdAsync(platformId, paginationParams);
+        var commandsDto = commands.Items.Select(c => c.Adapt<CommandReadDto>()).ToList();
+
+        var result = new PaginatedList<CommandReadDto>(
+            commandsDto,
+            commands.Count,
+            commands.Index,
+            commands.PageSize
+        );
+        return Ok(result);
     }
 
     [HttpPost]
