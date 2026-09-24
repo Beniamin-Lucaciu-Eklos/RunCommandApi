@@ -1,15 +1,15 @@
 @host =http://localhost:5029
 @platformId = 4
 @commandId = 1
-
+@paginationParams =pageIndex=1&pageSize=3
 ### Get all commands
-GET {{host}}/api/commands
+GET {{host}}/api/commands?{{paginationParams}}
 
 ### Get command by ID
 GET {{host}}/api/commands/{{commandId}}
 
 ### Get commands for a platform
-GET {{host}}/api/platforms/{{platformId}}/commands
+GET {{host}}/api/platforms/{{platformId}}/commands?{{paginationParams}}
 
 ### Create a new command
 POST {{host}}/api/commands
