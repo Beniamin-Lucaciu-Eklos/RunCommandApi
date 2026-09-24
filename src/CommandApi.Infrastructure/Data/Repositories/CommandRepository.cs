@@ -1,31 +1,87 @@
+using System.Linq.Expressions;
 using CommandApi.Application.Dtos;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace CommandApi.Infrastructure.Data.Repositories;
 
 public class CommandRepository(IApplicationDbContext dbContext) : ICommandRepository
 {
-    public async Task<PaginatedList<Command>> GetAllAsync(PaginationParams paginationParams)
+    public async Task<PaginatedList<Command>> GetAllAsync(
+        PaginationParams paginationParams,
+        FilteringParams filteringParams,
+        SortingParams sortingParams)
     {
-        var commands = await dbContext.Commands.AsNoTracking()
-           .OrderBy(c => c.Id)
+        var query = dbContext.Commands.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(filteringParams?.SearchBy))
+        {
+            string? searchBy = filteringParams?.SearchBy?.ToLower();
+            query = query.Where(c => c.HowTo.ToLower().Contains(searchBy)
+                             || c.CommandLine.ToLower().Contains(searchBy));
+        }
+
+        if (sortingParams is not null)
+        {
+            query = ApplySorting(query, sortingParams.desceding, sortingParams.SortBy);
+        }
+
+        var commands = await query.AsNoTracking()
            .Skip((paginationParams.PageIndex - 1) * paginationParams.PageSize)
            .Take(paginationParams.PageSize)
            .ToListAsync();
 
-        var count = await dbContext.Commands.CountAsync();
+        var count = await query.CountAsync();
         return new PaginatedList<Command>(commands, count, paginationParams.PageIndex, paginationParams.PageSize);
     }
 
-    public async Task<PaginatedList<Command>> GetAllByPlatformIdAsync(int platformId, PaginationParams paginationParams)
+    private IQueryable<Command> ApplySorting(
+        IQueryable<Command> query,
+        bool descending,
+        string? sortBy) => sortBy?.ToLower() switch
+        {
+            "howto" => descending ? query.OrderByDescending(c => c.HowTo)
+                                  : query.OrderBy(c => c.HowTo),
+
+            "commandline" => descending ? query.OrderByDescending(c => c.CommandLine)
+                                        : query.OrderBy(c => c.CommandLine),
+
+            "createdat" => descending ? query.OrderByDescending(c => c.CreatedAt)
+                                      : query.OrderBy(c => c.CreatedAt),
+
+            "platformid" => descending ? query.OrderByDescending(c => c.PlatformId)
+                                      : query.OrderBy(c => c.PlatformId),
+
+            _ => descending ? query.OrderByDescending(c => c.Id) : query.OrderBy(c => c.Id)
+        };
+
+    public async Task<PaginatedList<Command>> GetAllByPlatformIdAsync(
+        int platformId,
+        PaginationParams paginationParams,
+        FilteringParams filteringParams,
+        SortingParams sortingParams)
     {
-        var commands = await dbContext.Commands.AsNoTracking()
-             .Where(x => x.PlatformId == platformId)
-             .OrderBy(c => c.Id)
+        var query = dbContext.Commands.Where(x => x.PlatformId == platformId);
+
+        if (!string.IsNullOrWhiteSpace(filteringParams?.SearchBy))
+        {
+            string? searchBy = filteringParams?.SearchBy?.ToLower();
+            query = query.Where(c => c.HowTo.ToLower().Contains(searchBy)
+                             || c.CommandLine.ToLower().Contains(searchBy));
+        }
+
+        if (sortingParams is not null)
+        {
+            query = ApplySorting(query, sortingParams.desceding, sortingParams.SortBy);
+        }
+
+        var commands = await query.AsNoTracking()
              .Skip((paginationParams.PageIndex - 1) * paginationParams.PageSize)
              .Take(paginationParams.PageSize)
              .ToListAsync();
 
-        var count = await dbContext.Commands.AsNoTracking()
+        var count = await query.AsNoTracking()
             .CountAsync(x => x.PlatformId == platformId);
 
         return new PaginatedList<Command>(commands, count, paginationParams.PageIndex, paginationParams.PageSize);

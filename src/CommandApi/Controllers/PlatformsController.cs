@@ -37,7 +37,11 @@ public class PlatformsController(
     }
 
     [HttpGet("{platformId:int}/commands")]
-    public async Task<ActionResult<CommandReadDto>> GetCommandsByPlatformId(int platformId, [FromQuery] PaginationParams paginationParams)
+    public async Task<ActionResult<CommandReadDto>> GetCommandsByPlatformId(
+        int platformId,
+        [FromQuery] PaginationParams paginationParams,
+        [FromQuery] FilteringParams filteringParams,
+        [FromQuery] SortingParams sortingParams)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -46,7 +50,11 @@ public class PlatformsController(
         if (platform is null)
             return NotFound();
 
-        var commands = await commandRepository.GetAllByPlatformIdAsync(platformId, paginationParams);
+        var commands = await commandRepository.GetAllByPlatformIdAsync(
+            platformId,
+            paginationParams,
+            filteringParams,
+            sortingParams);
         var commandsDto = commands.Items.Select(c => c.Adapt<CommandReadDto>()).ToList();
 
         var result = new PaginatedList<CommandReadDto>(
