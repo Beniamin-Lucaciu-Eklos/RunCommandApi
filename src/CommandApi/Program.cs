@@ -1,6 +1,3 @@
-using CommandApi.Application;
-using Mapster;
-
 namespace CommandApi;
 
 public class Program
@@ -8,6 +5,21 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        builder.Host.UseSerilog((context, configuration) =>
+            configuration
+                    .ReadFrom.Configuration(context.Configuration)
+                    .Enrich.FromLogContext()
+                    .Enrich.WithMachineName()
+                    .Enrich.WithEnvironmentName()
+                    .Enrich.WithThreadId()
+                    .WriteTo.Console(
+                        outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
+                    .WriteTo.File(
+                        path: "logs/app-.log",
+                        rollingInterval: RollingInterval.Day,
+                        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}",
+                        retainedFileCountLimit: 30));
 
         // Add services to the container.
 
@@ -39,6 +51,8 @@ public class Program
         }
 
         app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+
+        app.UseSerilogRequestLogging();
 
         app.UseHttpsRedirection();
 
