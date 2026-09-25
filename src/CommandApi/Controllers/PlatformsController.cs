@@ -6,7 +6,8 @@ namespace CommandApi.Controllers;
 [Route("api/[controller]")]
 public class PlatformsController(
     IPlatformRepository platformRepository,
-    ICommandRepository commandRepository) : ControllerBase
+    ICommandRepository commandRepository,
+    ILogger<PlatformsController> logger) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<PaginatedList<PlatformReadDto>>> GetAllAsync([FromQuery] PaginationParams paginationParams)
@@ -28,11 +29,18 @@ public class PlatformsController(
     [HttpGet("{id}", Name = "GetById")]
     public async Task<ActionResult<PlatformReadDto>> GetById(int id)
     {
+        logger.LogInformation("Retrieving platform with ID={PlatformId}", id);
+
         var platform = await platformRepository.GetByIdAsync(id);
-        if (platform is null)
+        if (platform is null){
+            logger.LogWarning("Platform with ID={PlatformId} not found", id);
             return NotFound();
+        }
 
         var platformDto = platform.Adapt<PlatformReadDto>();
+
+         logger.LogDebug("Successfully retrieved platform: {PlatformName}", platform.PlatformName);
+         
         return Ok(platformDto);
     }
 
