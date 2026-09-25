@@ -38,6 +38,8 @@ public class Program
             app.MapOpenApi();
         }
 
+        app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
